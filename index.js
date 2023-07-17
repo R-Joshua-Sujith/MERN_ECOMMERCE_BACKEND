@@ -2,8 +2,8 @@ const express = require("express")
 const mongoose = require("mongoose")
 const dotenv = require("dotenv")
 const cors = require("cors")
-
-
+const cron = require('node-cron');
+const axios = require('axios')
 
 const ProductModel = require('./models/Product')
 const OrderModel = require('./models/Order');
@@ -15,6 +15,40 @@ app.use(cors());
 mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log("DB Connection Successful"))
     .catch((err) => console.log(err));
+
+
+app.get("/active", async (req, res) => {
+    try {
+        res.send("Mern Ecommerce Backend")
+    }
+    catch (err) {
+        res.status(500).json(err);
+    }
+})
+
+app.get('/scheduled-api', (req, res) => {
+    // Make the API request to your endpoint
+    axios.get('https://joshua-mern-ecommerce-backend-14.onrender.com/active')
+        .then(response => {
+            console.log(response.data);
+            res.send('API request sent successfully');
+        })
+        .catch(error => {
+            console.error(error);
+            res.status(500).send('Failed to send API request');
+        });
+});
+
+cron.schedule('*/10 * * * *', () => {
+    axios.get('http://localhost:5000/scheduled-api')
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+});
+
 
 
 app.get('/', async (req, res) => {
